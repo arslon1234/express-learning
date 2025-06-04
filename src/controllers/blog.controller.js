@@ -1,33 +1,41 @@
 
 import { blogLists } from "../db/index.js";
+import { Blog } from "../models/index.js";
 
 export const blogController = {
-   getAll(req,res,next){
+   async getAll(req,res,next){
     try{
-        res.status(200).send({data: blogLists})
+        const blogs = await Blog.find()
+        console.log(blogs)
+        res.status(200).json({ data: blogs });
     }catch(err){
         next(err)
     }
    },
-   create(req, res, next){
+   async create(req, res, next){
     try{
         const body = req.body
-        let id = blogLists.length + 1
-        const newBlog = {id, ...body}
-        blogLists.push(newBlog)
-        res.json(newBlog)
+        const blog = await Blog.find({title: body.title})
+        console.log(blog, 'blog')
+        if(blog.length > 0){
+            return res.status(403).send('Blog already exist')
+        }
+        const newBlog = new Blog({...body})
+        await newBlog.save()
+        res.status(201).send(newBlog)
     }catch(err){
         next(err)
     }
    },
-   delete(req, res, next) {
+   async delete(req, res, next) {
     try {
-        const id = parseInt(req.params.id); 
-        const initialLength = blogLists.length;
-        blogLists = blogLists.filter((item) => item.id !== id);
-        if (initialLength === blogLists.length) {
-            return res.status(404).send("Blog topilmadi");
+        const id = req.params.id
+        console.log(id, 'id')
+        const blog_id = Blog.findById({_id: id})
+        if(!blog_id){
+            return res.status(403).send('Blog not found in this ID')
         }
+        await Blog.deleteOne({_id: id})
         res.send("Successfully deleted!");
     } catch (err) {
         next(err);

@@ -11,7 +11,6 @@ const userScheme =  new Schema(
         password: Number,
         phone: {
             type: String,
-            unique: true,
         },
         address: String
     },

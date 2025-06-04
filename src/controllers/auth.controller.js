@@ -1,21 +1,24 @@
 import jwt from "jsonwebtoken"
+import bcrypt from "bcryptjs"
 import { User } from '../models/index.js'
+import { findByEmailUser, signUp } from "../service/index.js"
 export const authContoller = {
    async signup(req,res,next){
-        try{
-            const body = req.body
-            console.log(body.email, 'email')
-            const userExists = await User.find({email: body.email})
-            console.log(userExists, 'exist')
-            if(userExists.length > 0){
-                return res.status(403).send('user already exist!')
-            }
-            const newUser = new User({...body})
-            await newUser.save()
-            res.status(201).send(newUser)
-        }catch(err){
-            next(err)
+    try {
+        const body = req.body;
+        
+        const userExists = await findByEmailUser(body.email);
+  
+        if (userExists.data) {
+          return res.status(403).send("user already exists!");
         }
+  
+        const newUser = await signUp(body);
+  
+        res.status(201).send(newUser);
+      } catch (err) {
+        next(err);
+      }
     },
     async signin(req,res,next){
         try{

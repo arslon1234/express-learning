@@ -11,7 +11,7 @@ yarn.lock
 .env.development
 .env.production
 .env.test
-
+.env.*.local
 # Log va vaqtinchalik fayllar
 logs
 *.log
